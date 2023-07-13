@@ -11,9 +11,12 @@ from googleapiclient.discovery import build
 # print(api_key)
 # for key in os.environ:
 #     print(key, '--', os.environ[key])
+os.environ.setdefault('API_KEY', 'AIzaSyDp1Tf3pPXCN2lJ2Mzs-k7Zwr8v-pg4vrI')
+api_key = os.environ.get('API_KEY')
+# print(os.environ.get('API_KEY'))
 # создать специальный объект для работы с API
 
-youtube = build('youtube', 'v3', developerKey='AIzaSyDp1Tf3pPXCN2lJ2Mzs-k7Zwr8v-pg4vrI')
+youtube = build('youtube', 'v3', developerKey=api_key)
 
 
 def printj(dict_to_print: dict) -> None:
@@ -33,6 +36,6 @@ class Channel:
     def print_info(self) -> None:
         """Выводит в консоль информацию о канале."""
 
-        channel_id = self.channel_id
+        channel_id = self.channel_id 
         channel = youtube.channels().list(id=channel_id, part='snippet,statistics').execute()
         printj(channel)
