@@ -41,6 +41,27 @@ class Channel:
         self.video_count = channel['items'][0]['statistics']['videoCount']
         self.quantity_all_views = channel['items'][0]['statistics']['viewCount']
 
+
+    def __str__(self):
+        return f'{self.title} ({self.url})'
+
+
+    def __add__(self, other):
+        return int(self.quantity_sub)+int(other.quantity_sub)
+
+
+    def __sub__(self, other):
+        return int(self.quantity_sub) - int(other.quantity_sub)
+
+
+    def __gt__(self, other):
+        return int(self.quantity_sub) > int(other.quantity_sub)
+
+
+    def __ge__(self, other):
+        return int(self.quantity_sub) >= int(other.quantity_sub)
+
+
     def print_info(self) -> None:
         """Выводит в консоль информацию о канале."""
 
