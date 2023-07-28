@@ -1,47 +1,39 @@
+from src.channel import Channel
 import datetime
-import os
-from googleapiclient.discovery import build
 import isodate
-
-
-os.environ.setdefault('API_KEY', 'AIzaSyDp1Tf3pPXCN2lJ2Mzs-k7Zwr8v-pg4vrI')
-api_key = os.environ.get('API_KEY')
-
-youtube = build('youtube', 'v3', developerKey=api_key)
 class PlayList:
 
-
-    def __init__(self,playlist_id):
+    def __init__(self, playlist_id):
         self.playlist_id = playlist_id
+        self.url = f"https://www.youtube.com/playlist?list={playlist_id}"
+        youtube_obj = Channel.get_service()
 
-        channel_id = 'UC-OVMPlMA3-YCIeg4z5z23A'
+        playlists = youtube_obj.playlists().list(id=playlist_id,
+                                                 part='contentDetails,snippet',
+                                                 maxResults=50,
+                                                 ).execute()
 
-        playlists = youtube.playlists().list(channelId=channel_id,
-                                             part='contentDetails,snippet',
-                                             maxResults=50,
-                                             ).execute()
-        # printj(playlists)
-        for playlist in playlists['items']:
-            if playlist['id'] == self.playlist_id:
-                # print(playlist)
+        playlist_videos = youtube_obj.playlistItems().list(playlistId=playlist_id,
+                                                           part='contentDetails',
+                                                           maxResults=50,
+                                                           ).execute()
 
-                self.title = playlist['snippet']['title']
+        video_ids = [video['contentDetails']['videoId'] for video in playlist_videos['items']]
 
-
-        self.url = 'https://www.youtube.com/playlist?list=' + self.playlist_id
-
+        self.title = playlists['items'][0]['snippet']['title']
 
     @property
     def total_duration(self):
+        youtube_obj = Channel.get_service()
         playlist_id = self.playlist_id
-        playlist_videos = youtube.playlistItems().list(playlistId=playlist_id,
+        playlist_videos = youtube_obj.playlistItems().list(playlistId=playlist_id,
                                                        part='contentDetails',
                                                        maxResults=50,
                                                        ).execute()
 
         video_ids: list[str] = [video['contentDetails']['videoId'] for video in playlist_videos['items']]
 
-        video_response = youtube.videos().list(part='contentDetails,statistics',
+        video_response = youtube_obj.videos().list(part='contentDetails,statistics',
                                                id=','.join(video_ids)
                                                ).execute()
         # printj(video_response)
@@ -54,9 +46,11 @@ class PlayList:
         return total
 
 
+
     def show_best_video(self):
+        youtube_obj = Channel.get_service()
         playlist_id = self.playlist_id
-        playlist_videos = youtube.playlistItems().list(playlistId=playlist_id,
+        playlist_videos = youtube_obj.playlistItems().list(playlistId=playlist_id,
                                                        part='contentDetails',
                                                        maxResults=50,
                                                        ).execute()
@@ -68,7 +62,7 @@ class PlayList:
 
         for i in video_ids:
             video_id = i
-            video_response = youtube.videos().list(part='snippet,statistics,contentDetails,topicDetails',
+            video_response = youtube_obj.videos().list(part='snippet,statistics,contentDetails,topicDetails',
                                                    id=video_id
                                                    ).execute()
             list1.append(video_response)
@@ -81,30 +75,3 @@ class PlayList:
 
 def compare_by_likes(list):
     return int(list['items'][0]['statistics']['likeCount'])
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
